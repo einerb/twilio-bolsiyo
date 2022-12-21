@@ -1,8 +1,8 @@
-interface User {
+export interface User {
   name: string;
   phone: string;
 }
-export interface Response {
+export interface ResponseMessage {
   user: User[];
   channel: string;
 }

@@ -1,6 +1,9 @@
 import * as express from "express";
+import SendMessageDto from "../dto/send-message.dto";
+import HttpException from "../exceptions/httpException";
 
-import { Response } from "../interfaces";
+import { ResponseMessage } from "../interfaces";
+import validationMiddleware from "../middlewares/validation.middleware";
 
 export default class MessageController {
   public path = "/send-message";
@@ -11,19 +14,19 @@ export default class MessageController {
   }
 
   public intializeRoutes() {
-    this.router.post(this.path, this.sendMessage);
+    this.router.post(
+      this.path,
+      validationMiddleware(SendMessageDto),
+      this.sendMessage
+    );
   }
 
-  public sendMessage(req: express.Request, res: express.Response) {
-    var data: Response = req.body;
-
-    if (!data.channel)
-      res.status(400).json({ message: "No hay canal de envio!", data: null });
-
-    if (typeof data.user !== "object")
-      res
-        .status(400)
-        .json({ message: "Debe enviar un array de usuarios!", data: null });
+  public sendMessage(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) {
+    var data = req.body;
 
     const accountSid = process.env.FLEX_TWILIO_ACCOUNT_SID;
     const authToken = process.env.FLEX_TWILIO_AUTH_TOKEN;
@@ -45,7 +48,7 @@ export default class MessageController {
           });
       }
     } catch (err) {
-      res.status(500).json({ message: err, data: null });
+      next(new HttpException(500, err, null));
     }
   }
 }
