@@ -15,25 +15,25 @@ app.get("/", (req, res) => {
 app.post("/send-message", (req, res) => {
   var data: Response = req.body;
 
-  if (!data.agent || !data.message || !data.numberClient || !data.type)
-    res.status(400).json({ message: "No hay data para enviar!", data: null });
+  if (!data.channel)
+    res.status(400).json({ message: "No hay canal de envio!", data: null });
 
-  if (typeof data.numberClient !== "object")
+  if (typeof data.user !== "object")
     res
       .status(400)
-      .json({ message: "Debe enviar un array de numeros!", data: null });
+      .json({ message: "Debe enviar un array de usuarios!", data: null });
 
   const accountSid = process.env.FLEX_TWILIO_ACCOUNT_SID;
   const authToken = process.env.FLEX_TWILIO_AUTH_TOKEN;
   const client = require("twilio")(accountSid, authToken);
 
   try {
-    for (const numberClient of data.numberClient) {
+    for (const user of data.user) {
       client.messages
         .create({
-          body: `¡Hola! {{1}}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.`,
-          from: `${data.type}:+5713289008`,
-          to: `${data.type}:${numberClient}`,
+          body: `¡Hola! ${user.name}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.`,
+          from: `${data.channel}:+5713289008`,
+          to: `${data.channel}:${user.phone}`,
         })
         .then((message) => {
           res.status(200).json({

@@ -1,6 +1,8 @@
+interface User {
+  name: string;
+  phone: string;
+}
 export interface Response {
-  agent: string;
-  message: string;
-  numberClient: string[];
-  type: string;
+  user: User[];
+  channel: string;
 }
