@@ -1,6 +1,9 @@
 "use strict";
 exports.__esModule = true;
 var express = require("express");
+var send_message_dto_1 = require("../dto/send-message.dto");
+var httpException_1 = require("../exceptions/httpException");
+var validation_middleware_1 = require("../middlewares/validation.middleware");
 var MessageController = /** @class */ (function () {
     function MessageController() {
         this.path = "/send-message";
@@ -8,16 +11,10 @@ var MessageController = /** @class */ (function () {
         this.intializeRoutes();
     }
     MessageController.prototype.intializeRoutes = function () {
-        this.router.post(this.path, this.sendMessage);
+        this.router.post(this.path, (0, validation_middleware_1["default"])(send_message_dto_1["default"]), this.sendMessage);
     };
-    MessageController.prototype.sendMessage = function (req, res) {
+    MessageController.prototype.sendMessage = function (req, res, next) {
         var data = req.body;
-        if (!data.channel)
-            res.status(400).json({ message: "No hay canal de envio!", data: null });
-        if (typeof data.user !== "object")
-            res
-                .status(400)
-                .json({ message: "Debe enviar un array de usuarios!", data: null });
         var accountSid = process.env.FLEX_TWILIO_ACCOUNT_SID;
         var authToken = process.env.FLEX_TWILIO_AUTH_TOKEN;
         var client = require("twilio")(accountSid, authToken);
@@ -28,6 +25,7 @@ var MessageController = /** @class */ (function () {
                     .create({
                     body: "\u00A1Hola! ".concat(user.name, ", bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal."),
                     from: "".concat(data.channel, ":+5713289008"),
+                    mediaUrl: "https://raw.githubusercontent.com/dianephan/flask_upload_photos/main/UPLOADS/DRAW_THE_OWL_MEME.png",
                     to: "".concat(data.channel, ":").concat(user.phone)
                 })
                     .then(function (message) {
@@ -39,7 +37,7 @@ var MessageController = /** @class */ (function () {
             }
         }
         catch (err) {
-            res.status(500).json({ message: err, data: null });
+            next(new httpException_1["default"](500, err, null));
         }
     };
     return MessageController;

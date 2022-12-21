@@ -2,15 +2,20 @@
 exports.__esModule = true;
 var express = require("express");
 var bodyParser = require("body-parser");
+var error_middleware_1 = require("./middlewares/error.middleware");
 var App = /** @class */ (function () {
     function App(controllers, port) {
         this.app = express();
         this.port = port;
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
+        this.initializeErrorHandling();
     }
     App.prototype.initializeMiddlewares = function () {
         this.app.use(bodyParser.json());
+    };
+    App.prototype.initializeErrorHandling = function () {
+        this.app.use(error_middleware_1["default"]);
     };
     App.prototype.initializeControllers = function (controllers) {
         var _this = this;

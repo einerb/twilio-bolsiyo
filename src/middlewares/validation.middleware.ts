@@ -2,7 +2,7 @@ import { plainToClass } from "class-transformer";
 import { validate, ValidationError } from "class-validator";
 import * as express from "express";
 
-import HttpException from "../exceptions/HttpException";
+import HttpException from "../exceptions/httpException";
 
 export default function validationMiddleware<T>(
   type: any

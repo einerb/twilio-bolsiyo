@@ -38,6 +38,8 @@ export default class MessageController {
           .create({
             body: `¡Hola! ${user.name}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.`,
             from: `${data.channel}:+5713289008`,
+            mediaUrl:
+              "https://raw.githubusercontent.com/dianephan/flask_upload_photos/main/UPLOADS/DRAW_THE_OWL_MEME.png",
             to: `${data.channel}:${user.phone}`,
           })
           .then((message) => {
