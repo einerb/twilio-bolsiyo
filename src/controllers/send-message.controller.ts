@@ -2,7 +2,6 @@ import * as express from "express";
 import SendMessageDto from "../dto/send-message.dto";
 import HttpException from "../exceptions/httpException";
 
-import { ResponseMessage } from "../interfaces";
 import validationMiddleware from "../middlewares/validation.middleware";
 
 export default class MessageController {
@@ -38,8 +37,8 @@ export default class MessageController {
           .create({
             body: `¡Hola! ${user.name}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.`,
             from: `${data.channel}:+5713289008`,
-            mediaUrl:
-              "https://raw.githubusercontent.com/dianephan/flask_upload_photos/main/UPLOADS/DRAW_THE_OWL_MEME.png",
+            /* mediaUrl:
+              "https://raw.githubusercontent.com/dianephan/flask_upload_photos/main/UPLOADS/DRAW_THE_OWL_MEME.png", */
             to: `${data.channel}:${user.phone}`,
           })
           .then((message) => {
