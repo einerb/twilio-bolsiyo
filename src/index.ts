@@ -31,7 +31,7 @@ app.post("/send-message", (req, res) => {
     for (const numberClient of data.numberClient) {
       client.messages
         .create({
-          body: `Hola! Soy ${data.agent}, ${data.message}`,
+          body: `¡Hola! {{1}}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.`,
           from: `${data.type}:+5713289008`,
           to: `${data.type}:${numberClient}`,
         })
