@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
+import * as cors from "cors";
 
 import errorMiddleware from "./middlewares/error.middleware";
 
@@ -11,6 +12,7 @@ export default class App {
     this.app = express();
     this.port = port;
 
+    this.app.use(cors());
     this.initializeMiddlewares();
     this.initializeControllers(controllers);
     this.initializeErrorHandling();
