@@ -2,7 +2,7 @@ import * as expeditious from "express-expeditious";
 
 const cacheoptions: expeditious.ExpeditiousOptions = {
   namespace: "expresscache",
-  defaultTtl: "1 minute",
+  defaultTtl: "15 minute",
   engine: require("expeditious-engine-memory")(),
   statusCodeExpires: {
     404: "5 minutes",
