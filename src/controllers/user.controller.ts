@@ -34,23 +34,17 @@ export default class UserController {
       );
 
     try {
-      const api = process.env.USER_API;
+      const api = `${process.env.USER_API}/${cellPhone}`;
       const customHeaders = {
-        "api-key-authorization-return": process.env.USER_API_KEY,
+        "api-key": process.env.USER_API_KEY,
       };
       await axios
         .get(api, { headers: customHeaders })
         .then((response: any) => {
-          if (response.data.length === 0)
-            next(new HttpException(500, "No hay usuarios!", null));
-
-          const data = response.data.filter(
-            (x) => x.cellPhone === `+${cellPhone}`
-          );
-
           res.status(200).json({
+            status: 200,
             message: `🚀 Usuario encontrado`,
-            data: data.length > 0 ? data[0] : null,
+            data: response.data.data ?? null,
           });
         })
         .catch((error) => {

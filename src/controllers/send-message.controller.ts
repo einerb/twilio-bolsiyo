@@ -42,6 +42,7 @@ export default class MessageController {
           })
           .then((message) => {
             res.status(200).json({
+              status: 200,
               message: `🚀 Mensaje enviado con ID: ${message.sid}`,
               data: message,
             });
