@@ -35,7 +35,7 @@ export default class MessageController {
         client.messages
           .create({
             body: `¡Hola! ${user.name}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.`,
-            from: `${data.channel}:${process.env.FLEX_TWILIO_AUTH_TOKEN}`,
+            from: `${data.channel}:${process.env.FLEX_TWILIO_NUMBER_MAIN}`,
             /* mediaUrl:
               "https://raw.githubusercontent.com/dianephan/flask_upload_photos/main/UPLOADS/DRAW_THE_OWL_MEME.png", */
             to: `${data.channel}:${user.phone}`,
