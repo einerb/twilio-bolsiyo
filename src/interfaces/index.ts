@@ -1,8 +1,3 @@
-export interface User {
-  name: string;
-  phone: string;
-}
-export interface ResponseMessage {
-  user: User[];
-  channel: string;
-}
+export * from "./business.model";
+export * from "./country.model";
+export * from "./user.model";

@@ -1,11 +1,11 @@
 import * as express from "express";
 import axios from "axios";
-import * as util from "util";
 //const mixpanel = require("mixpanel").init("b08a063550d91084d8ac29a23ef304da");
 const mixpanel = require("../services/mixpanel.service");
 
 import HttpException from "../exceptions/httpException";
 import cacheInit from "../middlewares/cache.middleware";
+import { User } from "../interfaces";
 
 export default class UserController {
   public pathGetUserInfo = "/user-info";
@@ -41,10 +41,50 @@ export default class UserController {
       await axios
         .get(api, { headers: customHeaders })
         .then((response: any) => {
+          
+          let dateFromObjectId = function (objectId) {
+            return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+          };
+          let stateRegister: string = "";
+
+          if (!response.data.data["user"].cellPhoneVerified) {
+            stateRegister = "Por verificar telefono";
+          } else if (!response.data.data["user"].isComplete) {
+            stateRegister = "Por aceptar invitacion o crear negocio";
+          } else {
+            stateRegister = "Verificado";
+          }
+
+          let user: User = {
+            id: response.data.data["user"].id ?? null,
+            bolsiyoId: response.data.data["user"].bolsiyoId ?? null,
+            username: response.data.data["user"].username ?? null,
+            email: response.data.data["user"].email ?? null,
+            business: response.data.data["business"]?.name ?? null,
+            country: response.data.data["country"]?.name ?? null,
+            name: response.data.data["user"].name ?? null,
+            lastName: response.data.data["user"].lastName ?? null,
+            docType: response.data.data["user"].docType ?? null,
+            docNumber: response.data.data["user"].docNumber ?? null,
+            expeditionDate: response.data.data["user"].expeditionDate ?? null,
+            cellPhone: response.data.data["user"].cellPhone ?? null,
+            profileImage: response.data.data["user"].profileImage ?? null,
+            smallThumbnail: response.data.data["user"].smallThumbnail ?? null,
+            mediumThumbnail: response.data.data["user"].mediumThumbnail ?? null,
+            largeThumbnail: response.data.data["user"].largeThumbnail ?? null,
+            address: response.data.data["user"].address ?? null,
+            createdAt: dateFromObjectId(response.data.data["user"].id),
+            phoneNumber: response.data.data["user"].phoneNumber ?? null,
+            cellPhoneVerified:
+              response.data.data["user"].cellPhoneVerified ?? false,
+            stateRegister: stateRegister,
+            state: true,
+          };
+
           res.status(200).json({
             status: 200,
             message: `🚀 Usuario encontrado`,
-            data: response.data.data ?? null,
+            data: user,
           });
         })
         .catch((error) => {
