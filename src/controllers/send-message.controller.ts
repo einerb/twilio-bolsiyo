@@ -1,6 +1,6 @@
 import * as express from "express";
 
-import SendMessageWhatsAppDto from "../dto/send-message-whatsApp.dto";
+import SendMessageDto from "../dto/send-message-whatsApp.dto";
 import HttpException from "../exceptions/httpException";
 import validationMiddleware from "../middlewares/validation.middleware";
 import { Template } from "../templates/template";
@@ -10,7 +10,7 @@ const authToken = process.env.FLEX_TWILIO_AUTH_TOKEN;
 const client = require("twilio")(accountSid, authToken);
 
 export default class MessageController {
-  public pathSendMessageWhatsApp = "/send-message";
+  public pathSendMessage = "/send-message";
   public pathGetTemplates = "/templates";
   public router = express.Router();
 
@@ -20,9 +20,9 @@ export default class MessageController {
 
   public intializeRoutes() {
     this.router.post(
-      this.pathSendMessageWhatsApp,
-      validationMiddleware(SendMessageWhatsAppDto),
-      this.sendMessageWhatsApp
+      this.pathSendMessage,
+      validationMiddleware(SendMessageDto),
+      this.sendMessage
     );
     this.router.get(this.pathGetTemplates, this.getTemplates);
   }
@@ -39,7 +39,7 @@ export default class MessageController {
     });
   }
 
-  public async sendMessageWhatsApp(
+  public async sendMessage(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
@@ -47,33 +47,62 @@ export default class MessageController {
     var data = req.body;
     try {
       for (const user of data.user) {
-        if (!Template.find((t) => t.id === data.template)) {
-          next(
-            new HttpException(404, "No existe el template seleccionado!", null)
-          );
+        let templateBody = "";
+        if (data.channel === "whatsapp") {
+          if (!Template.find((t) => t.id === data.template)) {
+            next(
+              new HttpException(
+                404,
+                "No existe el template seleccionado!",
+                null
+              )
+            );
+          } else {
+            templateBody =
+              Template[data.template - 1].template.search("{{") !== -1
+                ? Template[data.template - 1].template.replace(
+                    "{{1}}",
+                    user.name
+                  )
+                : Template[data.template - 1].template;
+          }
         } else {
-          let templateBody =
-            Template[data.template - 1].template.search("{{") !== -1
-              ? Template[data.template - 1].template.replace("{{1}}", user.name)
-              : Template[data.template - 1].template;
-
-          await client.messages
-            .create({
-              body: templateBody,
-              from: `whatsapp:${process.env.FLEX_TWILIO_NUMBER_MAIN}`,
-              to: `whatsapp:${user.phone}`,
-            })
-            .then((message) => {
-              res.status(200).json({
-                status: 200,
-                message: `🚀 Mensaje enviado con ID: ${message.sid}`,
-                data: message,
-              });
-            })
-            .catch((error) => {
-              next(new HttpException(500, error, null));
-            });
+          if (!data.bodySMS) {
+            next(
+              new HttpException(
+                404,
+                "Falta agregar el cuerpo del mensaje",
+                null
+              )
+            );
+          }
+          templateBody = data.bodySMS;
         }
+
+        let dataMessage = {
+          body: templateBody,
+          from:
+            data.channel === "whatsapp"
+              ? `${data.channel}:${process.env.FLEX_TWILIO_NUMBER_MAIN_WHATSAPP}`
+              : `${process.env.FLEX_TWILIO_NUMBER_MAIN_SMS}`,
+          to:
+            data.channel === "whatsapp"
+              ? `${data.channel}:${user.phone}`
+              : `${user.phone}`,
+        };
+
+        await client.messages
+          .create(dataMessage)
+          .then((message) => {
+            res.status(200).json({
+              status: 200,
+              message: `🚀 Mensaje enviado con ID: ${message.sid}`,
+              data: message,
+            });
+          })
+          .catch((error) => {
+            next(new HttpException(500, error, null));
+          });
       }
     } catch (err) {
       next(new HttpException(500, err, null));
