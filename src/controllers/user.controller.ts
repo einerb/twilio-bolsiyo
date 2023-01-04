@@ -86,7 +86,11 @@ export default class UserController {
           });
         })
         .catch((error) => {
-          next(new HttpException(500, error, null));
+          res.status(404).json({
+            status: 404,
+            message: `Usuario no encontrado`,
+            data: error.message,
+          });
         });
     } catch (err) {
       next(new HttpException(500, err, null));
