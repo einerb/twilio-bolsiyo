@@ -60,8 +60,8 @@ export default class MessageController {
           await client.messages
             .create({
               body: templateBody,
-              from: `${data.channel}:${process.env.FLEX_TWILIO_NUMBER_MAIN}`,
-              to: `${data.channel}:${user.phone}`,
+              from: `whatsapp:${process.env.FLEX_TWILIO_NUMBER_MAIN}`,
+              to: `whatsapp:${user.phone}`,
             })
             .then((message) => {
               res.status(200).json({

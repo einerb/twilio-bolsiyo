@@ -7,10 +7,6 @@ export default class SendMessageWhatsAppDto {
   @IsNotEmpty()
   public user: User;
 
-  @IsString()
-  @IsNotEmpty()
-  public channel: string;
-
   @IsNumber()
   public template: number;
 }
