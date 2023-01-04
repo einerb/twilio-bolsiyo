@@ -1,6 +1,12 @@
 import { Business } from "./business.model";
 import { Country } from "./country.model";
 
+export enum States {
+  CELLPHONE = "Por verificar teléfono",
+  COMPLETE = "Por aceptar invitación o crear negocio",
+  VERIFIED = "Verificado",
+}
+
 export interface User {
   id?: string;
   bolsiyoId?: string;
@@ -19,10 +25,10 @@ export interface User {
   mediumThumbnail: string;
   largeThumbnail: string;
   address?: string;
-  createdAt: Date;
+  createdAt: string;
   isComplete?: boolean;
   cellPhoneVerified: boolean;
   phoneNumber: string;
-  stateRegister: string;
+  stateRegister: States;
   state: boolean;
 }

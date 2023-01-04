@@ -5,7 +5,8 @@ const mixpanel = require("../services/mixpanel.service");
 
 import HttpException from "../exceptions/httpException";
 import cacheInit from "../middlewares/cache.middleware";
-import { User } from "../interfaces";
+import { User, States } from "../interfaces";
+import moment = require("moment-timezone");
 
 export default class UserController {
   public pathGetUserInfo = "/user-info";
@@ -14,6 +15,7 @@ export default class UserController {
 
   constructor() {
     this.intializeRoutes();
+    moment.locale("es");
   }
 
   public intializeRoutes() {
@@ -41,19 +43,20 @@ export default class UserController {
       await axios
         .get(api, { headers: customHeaders })
         .then((response: any) => {
-          
           let dateFromObjectId = function (objectId) {
             return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
           };
-          let stateRegister: string = "";
+          let stateRegister: States;
 
-          if (!response.data.data["user"].cellPhoneVerified) {
-            stateRegister = "Por verificar telefono";
-          } else if (!response.data.data["user"].isComplete) {
-            stateRegister = "Por aceptar invitacion o crear negocio";
-          } else {
-            stateRegister = "Verificado";
-          }
+          if (!response.data.data["user"].cellPhoneVerified)
+            stateRegister = States.CELLPHONE;
+          else if (!response.data.data["user"].isComplete)
+            stateRegister = States.COMPLETE;
+          else stateRegister = States.VERIFIED;
+
+          let createdAt = moment(
+            dateFromObjectId(response.data.data["user"].id)
+          );
 
           let user: User = {
             id: response.data.data["user"].id ?? null,
@@ -73,12 +76,12 @@ export default class UserController {
             mediumThumbnail: response.data.data["user"].mediumThumbnail ?? null,
             largeThumbnail: response.data.data["user"].largeThumbnail ?? null,
             address: response.data.data["user"].address ?? null,
-            createdAt: dateFromObjectId(response.data.data["user"].id),
+            createdAt: createdAt.tz("America/Bogota").format("LLLL"),
             phoneNumber: response.data.data["user"].phoneNumber ?? null,
             cellPhoneVerified:
               response.data.data["user"].cellPhoneVerified ?? false,
             stateRegister: stateRegister,
-            state: true,
+            state: stateRegister === States.VERIFIED ? true : false,
           };
 
           res.status(200).json({
