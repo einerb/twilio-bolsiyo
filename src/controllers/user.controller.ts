@@ -43,43 +43,38 @@ export default class UserController {
       await axios
         .get(api, { headers: customHeaders })
         .then((response: any) => {
+          let data = response.data.data;
           let dateFromObjectId = function (objectId) {
             return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
           };
           let stateRegister: States;
+          let createdAt = moment(dateFromObjectId(data["user"].id));
 
-          if (!response.data.data["user"].cellPhoneVerified)
-            stateRegister = States.CELLPHONE;
-          else if (!response.data.data["user"].isComplete)
-            stateRegister = States.COMPLETE;
+          if (!data["user"].cellPhoneVerified) stateRegister = States.CELLPHONE;
+          else if (!data["user"].isComplete) stateRegister = States.COMPLETE;
           else stateRegister = States.VERIFIED;
 
-          let createdAt = moment(
-            dateFromObjectId(response.data.data["user"].id)
-          );
-
           let user: User = {
-            id: response.data.data["user"].id ?? null,
-            bolsiyoId: response.data.data["user"].bolsiyoId ?? null,
-            username: response.data.data["user"].username ?? null,
-            email: response.data.data["user"].email ?? null,
-            business: response.data.data["business"]?.name ?? null,
-            country: response.data.data["country"]?.name ?? null,
-            name: response.data.data["user"].name ?? null,
-            lastName: response.data.data["user"].lastName ?? null,
-            docType: response.data.data["user"].docType ?? null,
-            docNumber: response.data.data["user"].docNumber ?? null,
-            expeditionDate: response.data.data["user"].expeditionDate ?? null,
-            cellPhone: response.data.data["user"].cellPhone ?? null,
-            profileImage: response.data.data["user"].profileImage ?? null,
-            smallThumbnail: response.data.data["user"].smallThumbnail ?? null,
-            mediumThumbnail: response.data.data["user"].mediumThumbnail ?? null,
-            largeThumbnail: response.data.data["user"].largeThumbnail ?? null,
-            address: response.data.data["user"].address ?? null,
+            id: data["user"].id ?? null,
+            bolsiyoId: data["user"].bolsiyoId ?? null,
+            username: data["user"].username ?? null,
+            email: data["user"].email ?? null,
+            business: data["business"]?.name ?? null,
+            country: data["country"]?.name ?? null,
+            name: data["user"].name ?? null,
+            lastName: data["user"].lastName ?? null,
+            docType: data["user"].docType ?? null,
+            docNumber: data["user"].docNumber ?? null,
+            expeditionDate: data["user"].expeditionDate ?? null,
+            cellPhone: data["user"].cellPhone ?? null,
+            profileImage: data["user"].profileImage ?? null,
+            smallThumbnail: data["user"].smallThumbnail ?? null,
+            mediumThumbnail: data["user"].mediumThumbnail ?? null,
+            largeThumbnail: data["user"].largeThumbnail ?? null,
+            address: data["user"].address ?? null,
             createdAt: createdAt.tz("America/Bogota").format("LLLL"),
-            phoneNumber: response.data.data["user"].phoneNumber ?? null,
-            cellPhoneVerified:
-              response.data.data["user"].cellPhoneVerified ?? false,
+            phoneNumber: data["user"].phoneNumber ?? null,
+            cellPhoneVerified: data["user"].cellPhoneVerified ?? false,
             stateRegister: stateRegister,
             state: stateRegister === States.VERIFIED ? true : false,
           };
