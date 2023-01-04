@@ -10,10 +10,10 @@ export enum States {
 export interface User {
   id?: string;
   bolsiyoId?: string;
-  username?: string;
+  username: string;
   email: string;
-  business: Business[];
-  country: Country;
+  business?: Business[];
+  country?: Country;
   name: string;
   lastName?: string;
   docType: string;
@@ -21,14 +21,14 @@ export interface User {
   expeditionDate?: string;
   cellPhone: string;
   profileImage?: string;
-  smallThumbnail: string;
-  mediumThumbnail: string;
-  largeThumbnail: string;
+  smallThumbnail?: string;
+  mediumThumbnail?: string;
+  largeThumbnail?: string;
   address?: string;
-  createdAt: string;
+  createdAt?: string;
   isComplete?: boolean;
-  cellPhoneVerified: boolean;
-  phoneNumber: string;
-  stateRegister: States;
-  state: boolean;
+  cellPhoneVerified?: boolean;
+  phoneNumber?: string;
+  stateRegister?: States;
+  state?: boolean;
 }

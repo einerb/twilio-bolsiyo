@@ -10,6 +10,7 @@ import moment = require("moment-timezone");
 
 export default class UserController {
   public pathGetUserInfo = "/user-info";
+  public pathGetUser = "/users";
   public pathGetEvents = "/user-events";
   public router = express.Router();
 
@@ -19,11 +20,12 @@ export default class UserController {
   }
 
   public intializeRoutes() {
-    this.router.get(this.pathGetUserInfo, cacheInit, this.filterUserInfo);
+    this.router.get(this.pathGetUserInfo, cacheInit, this.getUserInfo);
+    this.router.get(this.pathGetUser, cacheInit, this.getUsers);
     this.router.post(this.pathGetEvents, this.getEvents);
   }
 
-  public async filterUserInfo(
+  public async getUserInfo(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
@@ -36,7 +38,7 @@ export default class UserController {
       );
 
     try {
-      const api = `${process.env.USER_API}/${cellPhone}`;
+      const api = `${process.env.USER_API}/v1/users/${cellPhone}`;
       const customHeaders = {
         "api-key": process.env.USER_API_KEY,
       };
@@ -54,7 +56,7 @@ export default class UserController {
           else if (!data["user"].isComplete) stateRegister = States.COMPLETE;
           else stateRegister = States.VERIFIED;
 
-          let user: User = {
+          const user: User = {
             id: data["user"].id ?? null,
             bolsiyoId: data["user"].bolsiyoId ?? null,
             username: data["user"].username ?? null,
@@ -89,6 +91,52 @@ export default class UserController {
           res.status(404).json({
             status: 404,
             message: `Usuario no encontrado`,
+            data: error.message,
+          });
+        });
+    } catch (err) {
+      next(new HttpException(500, err, null));
+    }
+  }
+
+  public async getUsers(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) {
+    try {
+      const api = `${process.env.USER_API}/users`;
+      const customHeaders = {
+        "api-key-authorization-return": process.env.API_KEY_AUTH,
+      };
+      await axios
+        .get(api, { headers: customHeaders })
+        .then((response: any) => {
+          let data = response.data;
+
+          let user: User[] = [];
+          data.forEach((element) => {
+            user.push({
+              id: element.id ?? null,
+              username: element.username ?? null,
+              email: element.email ?? null,
+              name: element.name ?? null,
+              lastName: element.lastName ?? null,
+              docType: element.docType ?? null,
+              docNumber: element.docNumber ?? null,
+              cellPhone: element.cellPhone ?? null,
+            });
+          });
+          res.status(200).json({
+            status: 200,
+            message: `🚀 Usuarios encontrados`,
+            data: user,
+          });
+        })
+        .catch((error) => {
+          res.status(404).json({
+            status: 404,
+            message: `Usuarios no encontrado`,
             data: error.message,
           });
         });
