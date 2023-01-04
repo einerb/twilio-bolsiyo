@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, ArrayNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, ArrayNotEmpty, IsNumber } from "class-validator";
 
 import { User } from "../interfaces";
 
@@ -10,4 +10,7 @@ export default class SendMessageWhatsAppDto {
   @IsString()
   @IsNotEmpty()
   public channel: string;
+
+  @IsNumber()
+  public template: number;
 }
