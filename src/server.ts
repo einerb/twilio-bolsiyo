@@ -1,5 +1,5 @@
 import App from "./app";
-import MessageController from "./controllers/send-message.controller";
+import MessageController from "./controllers/message.controller";
 import UserController from "./controllers/user.controller";
 
 const app = new App(
