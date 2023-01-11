@@ -174,7 +174,7 @@ export default class UserController {
       response.data.results.forEach((element: any, index: number) => {
         dashboard.push({
           id: index + 1,
-          workspaceId: 3319977,
+          dashboardId: element.id,
           name: element.title,
         });
       });
@@ -279,12 +279,10 @@ export default class UserController {
       for (const [index, [key, value]] of Object.entries(
         Object.entries(data)
       )) {
-        console.log(key);
-
         user.push({
           id: parseInt(index) + 1,
           //name: value[key][value],
-          cellphone: value,
+          cellphone: value[parseInt(index)],
         });
       }
 
@@ -293,7 +291,7 @@ export default class UserController {
           status: 200,
           message: `🚀 usuarios encontrados del segmento`,
           data: {
-            users: user,
+            users: data,
           },
         });
       }
