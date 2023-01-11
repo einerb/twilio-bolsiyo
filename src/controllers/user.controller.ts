@@ -1,7 +1,5 @@
 import * as express from "express";
 import axios from "axios";
-//const mixpanel = require("mixpanel").init("b08a063550d91084d8ac29a23ef304da");
-const mixpanel = require("../services/mixpanel.service");
 
 import HttpException from "../exceptions/httpException";
 import cacheInit from "../middlewares/cache.middleware";
@@ -11,7 +9,9 @@ import moment = require("moment-timezone");
 export default class UserController {
   public pathGetUserInfo = "/user-info";
   public pathGetUser = "/users";
-  public pathGetEvents = "/user-events";
+  public pathGetDashboard = "/dashboard";
+  public pathGetSegment = "/segment";
+  public pathGetUserSegment = "/user-events";
   public router = express.Router();
 
   constructor() {
@@ -22,7 +22,9 @@ export default class UserController {
   public intializeRoutes() {
     this.router.get(this.pathGetUserInfo, cacheInit, this.getUserInfo);
     this.router.get(this.pathGetUser, cacheInit, this.getUsers);
-    this.router.post(this.pathGetEvents, this.getEvents);
+    this.router.get(this.pathGetDashboard, cacheInit, this.getDashboard);
+    this.router.get(this.pathGetSegment, cacheInit, this.getSegment);
+    this.router.get(this.pathGetUserSegment, cacheInit, this.getUserEvents);
   }
 
   public async getUserInfo(
@@ -112,6 +114,9 @@ export default class UserController {
       await axios
         .get(api, { headers: customHeaders })
         .then((response: any) => {
+          let dateFromObjectId = function (objectId) {
+            return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+          };
           let data = response.data;
 
           let user: User[] = [];
@@ -125,6 +130,9 @@ export default class UserController {
               docType: element.docType ?? null,
               docNumber: element.docNumber ?? null,
               cellPhone: element.cellPhone ?? null,
+              createdAt: moment(dateFromObjectId(element.id))
+                .tz("America/Bogota")
+                .format("LLLL"),
             });
           });
           res.status(200).json({
@@ -145,39 +153,150 @@ export default class UserController {
     }
   }
 
-  public async getEvents(
+  /* Mix Panel */
+  public async getDashboard(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
   ) {
-    let eventName = req.body.eventName;
+    const options = {
+      method: "GET",
+      url: "https://mixpanel.com/api/app/workspaces/3319977/dashboards",
+      headers: {
+        accept: "application/json",
+        authorization:
+          "Basic RWluZXIuNWY3NmNhLm1wLXNlcnZpY2UtYWNjb3VudDpiUzFmd3ZaMTFBVVVuWGdRaVVxbm8wZkM4VG9hNzBnNw==",
+      },
+    };
 
-    try {
-      const options = {
-        method: "POST",
-        url: "https://api.mixpanel.com/track",
-        headers: { accept: "text/plain", "content-type": "application/json" },
-        data: [
-          {
-            properties: { token: "b08a063550d91084d8ac29a23ef304da" },
-            event: eventName,
-          },
-        ],
-      };
-
-      await axios
-        .request(options)
-        .then(function (response) {
-          res.status(200).json({
-            message: `🚀 Eventos encontrados`,
-            data: response.data,
-          });
-        })
-        .catch((error) => {
-          next(new HttpException(500, error, null));
+    await axios.request(options).then((response: any) => {
+      let dashboard = [];
+      response.data.results.forEach((element: any, index: number) => {
+        dashboard.push({
+          id: index + 1,
+          workspaceId: 3319977,
+          name: element.title,
         });
-    } catch (err) {
-      next(new HttpException(500, err, null));
+      });
+
+      res.status(200).json({
+        status: 200,
+        message: `🚀 Dashboard encontrados`,
+        data: {
+          boards: dashboard,
+        },
+      });
+    });
+  }
+
+  public async getSegment(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) {
+    const dashboardId = req.query.dashboardId;
+    if (!dashboardId) {
+      next(
+        new HttpException(
+          400,
+          "Debe proporcionar el parámetro dashboardId",
+          null
+        )
+      );
     }
+
+    const options = {
+      method: "GET",
+      url: `https://mixpanel.com/api/app/workspaces/3319977/dashboards/${dashboardId}`,
+      headers: {
+        accept: "application/json",
+        authorization:
+          "Basic RWluZXIuNWY3NmNhLm1wLXNlcnZpY2UtYWNjb3VudDpiUzFmd3ZaMTFBVVVuWGdRaVVxbm8wZkM4VG9hNzBnNw==",
+      },
+    };
+
+    await axios.request(options).then((response: any) => {
+      const data = response.data.results;
+      let contents = data.contents.report;
+      let segments = [];
+      for (const [index, [key, value]] of Object.entries(
+        Object.entries(contents)
+      )) {
+        segments.push({
+          id: parseInt(index) + 1,
+          bookmarkId: value["id"],
+          name: value["name"],
+        });
+      }
+
+      if (data) {
+        const segment = {
+          id: data.id,
+          dashboard: data.title,
+          segments: segments,
+        };
+        res.status(200).json({
+          status: 200,
+          message: `🚀 Segmento encontrado`,
+          data: segment,
+        });
+      }
+    });
+  }
+
+  public async getUserEvents(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) {
+    const bookmarkId = req.query.bookmarkId;
+
+    if (!bookmarkId) {
+      next(
+        new HttpException(
+          400,
+          "Debe proporcionar el parámetro bookmarkId",
+          null
+        )
+      );
+    }
+
+    const options = {
+      method: "GET",
+      url: `https://mixpanel.com/api/2.0/insights?project_id=2785145&bookmark_id=${bookmarkId}`,
+      headers: {
+        accept: "application/json",
+        authorization:
+          "Basic RWluZXIuNWY3NmNhLm1wLXNlcnZpY2UtYWNjb3VudDpiUzFmd3ZaMTFBVVVuWGdRaVVxbm8wZkM4VG9hNzBnNw==",
+      },
+    };
+
+    await axios.request(options).then((response: any) => {
+      const data = response.data.series;
+
+      const user = [];
+
+      for (const [index, [key, value]] of Object.entries(
+        Object.entries(data)
+      )) {
+        console.log(key);
+
+        user.push({
+          id: parseInt(index) + 1,
+          //name: value[key][value],
+          cellphone: value,
+        });
+      }
+
+      if (data) {
+        res.status(200).json({
+          status: 200,
+          message: `🚀 usuarios encontrados del segmento`,
+          data: {
+            users: user,
+          },
+        });
+      }
+    });
   }
 }

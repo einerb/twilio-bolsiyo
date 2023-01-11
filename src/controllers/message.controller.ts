@@ -15,7 +15,7 @@ const client = require("twilio")(accountSid, authToken);
 
 export default class MessageController {
   public pathSendMessage = "/send-message";
-  public pathGetTemplates = "/templates";
+  public pathGetTemplates = "/templates-whatsapp";
   public pathGetConversations = "/conversations";
   public pathGetConversationDetails = "/conversation-details";
   public router = express.Router();
