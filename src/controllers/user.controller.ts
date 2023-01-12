@@ -138,7 +138,7 @@ export default class UserController {
           res.status(200).json({
             status: 200,
             message: `🚀 Usuarios encontrados`,
-            data: user,
+            data: user.reverse(),
           });
         })
         .catch((error) => {
