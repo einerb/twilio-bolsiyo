@@ -4,6 +4,8 @@ export const Template = [
     name: "_saludo1_",
     template:
       "¡Hola! {{1}}, bienvenido a la comunidad Bolsiyo, soy Vale, tu asistente personal.",
+    variable: 1,
+    enabled: true,
   },
   /* {
     id: 2,

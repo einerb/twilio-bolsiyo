@@ -48,10 +48,16 @@ export default class MessageController {
     res: express.Response,
     next: express.NextFunction
   ) {
+    const templates = Template.map((element) =>
+      element.enabled ? element : null
+    );
+
     res.status(200).json({
       status: 200,
       message: `🚀 Templates aprobados`,
-      data: Template ?? null,
+      data: {
+        templates,
+      },
     });
   }
 
