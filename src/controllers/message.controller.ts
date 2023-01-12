@@ -109,8 +109,8 @@ export default class MessageController {
               : `${process.env.FLEX_TWILIO_NUMBER_MAIN_SMS}`,
           to:
             data.channel === "whatsapp"
-              ? `${data.channel}:${user.phone}`
-              : `${user.phone}`,
+              ? `${data.channel}:${user.cellPhone}`
+              : `${user.cellPhone}`,
         };
 
         await client.messages
