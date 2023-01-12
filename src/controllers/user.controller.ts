@@ -272,26 +272,32 @@ export default class UserController {
     };
 
     await axios.request(options).then((response: any) => {
-      const data = response.data.series;
+      const series = Object.values(response.data.series);
+      const listFound = series.length ? series[0] : [];
 
-      const user = [];
-
-      for (const [index, [key, value]] of Object.entries(
-        Object.entries(data)
-      )) {
-        user.push({
-          id: parseInt(index) + 1,
-          //name: value[key][value],
-          cellphone: value[parseInt(index)],
-        });
+      const users = [];
+      let i = 1;
+      for (const name of Object.keys(listFound)) {
+        const phones = Object.keys(listFound[name]);
+        phones.shift();
+        for (const cellphone of phones) {
+          if (cellphone.includes("+")) {
+            users.push({
+              id: i,
+              name: name,
+              cellphone: cellphone,
+            });
+            i++;
+          }
+        }
       }
 
-      if (data) {
+      if (series) {
         res.status(200).json({
           status: 200,
           message: `🚀 usuarios encontrados del segmento`,
           data: {
-            users: data,
+            users: users,
           },
         });
       }
