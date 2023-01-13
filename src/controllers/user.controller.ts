@@ -219,14 +219,16 @@ export default class UserController {
       const data = response.data.results;
       let contents = data.contents.report;
       let segments = [];
-      for (const [index, [key, value]] of Object.entries(
-        Object.entries(contents)
-      )) {
+
+      let index: number = 0;
+      for (const key in contents) {
+        let value = contents[key];
         segments.push({
-          id: parseInt(index) + 1,
-          bookmarkId: value["id"],
+          id: index + 1,
+          bookmarkId: key,
           name: value["name"],
         });
+        index++;
       }
 
       if (data) {
