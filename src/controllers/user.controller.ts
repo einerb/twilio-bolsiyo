@@ -275,6 +275,7 @@ export default class UserController {
 
     await axios.request(options).then((response: any) => {
       const series = Object.values(response.data.series);
+      const nameSerie = Object.keys(response.data.series);
       const listFound = series.length ? series[0] : [];
 
       const users = [];
@@ -299,6 +300,7 @@ export default class UserController {
           status: 200,
           message: `🚀 usuarios encontrados del segmento`,
           data: {
+            name: nameSerie[0],
             users: users,
           },
         });
