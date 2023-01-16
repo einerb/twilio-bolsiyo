@@ -25,7 +25,7 @@ export interface User {
   mediumThumbnail?: string;
   largeThumbnail?: string;
   address?: string;
-  createdAt?: string;
+  createdAt?: number;
   isComplete?: boolean;
   cellPhoneVerified?: boolean;
   phoneNumber?: string;

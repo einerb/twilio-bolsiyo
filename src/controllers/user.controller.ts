@@ -52,7 +52,6 @@ export default class UserController {
             return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
           };
           let stateRegister: States;
-          let createdAt = moment(dateFromObjectId(data["user"].id));
 
           if (!data["user"].cellPhoneVerified) stateRegister = States.CELLPHONE;
           else if (!data["user"].isComplete) stateRegister = States.COMPLETE;
@@ -76,7 +75,7 @@ export default class UserController {
             mediumThumbnail: data["user"].mediumThumbnail ?? null,
             largeThumbnail: data["user"].largeThumbnail ?? null,
             address: data["user"].address ?? null,
-            createdAt: createdAt.tz("America/Bogota").format("LLLL"),
+            createdAt: new Date(dateFromObjectId(data["user"].id)).getTime(),
             phoneNumber: data["user"].phoneNumber ?? null,
             cellPhoneVerified: data["user"].cellPhoneVerified ?? false,
             stateRegister: stateRegister,
@@ -130,9 +129,7 @@ export default class UserController {
               docType: element.docType ?? null,
               docNumber: element.docNumber ?? null,
               cellPhone: element.cellPhone ?? null,
-              createdAt: moment(dateFromObjectId(element.id))
-                .tz("America/Bogota")
-                .format("LLLL"),
+              createdAt: new Date(dateFromObjectId(element.id)).getTime(),
             });
           });
           res.status(200).json({
